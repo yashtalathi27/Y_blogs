@@ -21,15 +21,15 @@ const blogSchema=new mongoose.Schema({
         default:false
     },
     creator:{
-        // type:mongoose.Schema.Types.ObjectId,
-        type:String,
+        type:mongoose.Schema.Types.ObjectId,
+        // type:String,
         required:true,
         ref:"User"
     },
     likes:[
         {
             type:String,
-            ref:"User"
+            ref:"User",
         }
     ],
     comments:[   

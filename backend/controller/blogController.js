@@ -6,6 +6,7 @@ const { verifyJWT, decodeJWT } = require("../utils/generateToken");
 const {uploadImage,deleteImage}=require('../utils/cloudinary')
 const fs=require('fs');
 const uniqid=require('uniqid');
+const { log } = require("console");
 
 // SAFE ROUTES
 
@@ -117,14 +118,14 @@ async function getBlog(req, res) {
           path: "user",
           select: "name",
         },
-      },
+      }
+    ]).populate(
       {
-        path: "creator",
-        select: "-password",
-      },
-    ]);
+      path:"creator",
+      select:"email name"
+    });
     
-    // console.log(blog);
+    console.log(blog);
 
     if (blog) {
       return res.json({ blog });
@@ -138,36 +139,46 @@ async function getBlog(req, res) {
 
 async function updateBlog(req, res) {
   try {
-    const { title, description, draft } = req.body;
+    const { title, description } = req.body;
+    log(req.body)
+    console.log(title,description);
+    
     // console.log(creator);
     // console.log(req.body);
     const { id } = req.params;
     const creator = req.user; // Assume this is populated by middleware
     console.log("Authenticated User:", creator);
 
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findOne({blogid:id});
     if (!blog) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "Blog not found",
         success: false,
       });
     }
+    const blodidd=blog.creator?._id.toString();
+    console.log("Blog Creator:", blodidd,creator);
 
-    console.log("Blog Creator:", blog.creator);
-
-    if (blog.creator.toString() !== creator.toString()) {
-      return res.status(403).json({
-        message: "This is not your blog",
-        success: false,
-      });
+    if(blodidd!=creator){
+      return res.json({
+        success:false,
+        message:"not your blog"
+      })
     }
+    
 
-    const upd = await Blog.findByIdAndUpdate(id, {
-      title,
-      description,
-      draft,
-    });
-
+    const upd = await Blog.findOneAndUpdate(
+      { blogid: id },
+      {
+        title,
+        description,
+        
+      },
+      { new: true } // This ensures the updated document is returned
+    );
+    
+    // console.log(upd);
+    
     return res.json({
       message: "Blog updates",
       success: true,

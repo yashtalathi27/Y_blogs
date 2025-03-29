@@ -1,9 +1,13 @@
 import axios from "axios";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 function AddBlog() {
-  const data = JSON.parse(localStorage.getItem("token"));
+  const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+  const data=user?.token;
+  // const {token}=useSelector(slice=>slice.userSlice)
   if (!data) {
     return <Navigate to="/signin" />;
   }

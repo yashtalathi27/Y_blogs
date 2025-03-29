@@ -8,7 +8,7 @@ async function likeBlog(req, res) {
       const creator = req.user;
       const { id } = req.params;
   
-      const blog = await Blog.findById(id);
+      const blog = await Blog.findOne({blogid:id});
   
       if (!blog) {
         return res.status(500).json({
@@ -17,27 +17,34 @@ async function likeBlog(req, res) {
       }
   
       if (!blog.likes.includes(creator)) {
-        await Blog.findByIdAndUpdate(id, { $push: { likes: creator } });
+        await Blog.findOneAndUpdate({blogid:id}, { $push: { likes: creator } });
         return res.status(200).json({
+          liked:true,
+          sucess:true,
           message: "Blog Liked sucessfully",
         });
       } else {
-        await Blog.findByIdAndUpdate(id, { $pull: { likes: creator } });
-  
+        await Blog.findOneAndUpdate({blogid:id}, { $pull: { likes: creator } });
         return res.status(200).json({
+          liked:false,
+          sucess:true,
           message: "Blog UnLiked sucessfully",
         });
       }
     } catch (error) {
       return res.status(500).json({
         message: "Internal server error",
-        error: err.errmsg,
+        error: error.errmsg,
       });
     }
   }
   
 async function commentBlog(req, res) {
     try {
+      // console.log("Sad");
+      
+      console.log(req.body);
+      
       const { id } = req.params;
       const {comment} =req.body;
       const creator = req.user;
@@ -50,7 +57,7 @@ async function commentBlog(req, res) {
           });  
       }
   
-      const blog = await Blog.findById(id);
+      const blog = await Blog.findOne({blogid:id});
   
       // console.log(blog);
       
@@ -66,12 +73,19 @@ async function commentBlog(req, res) {
           comment,
           blog:id,
           user:creator
+      }).then((comment)=>{
+        return comment.populate({
+          path:"user",
+          select:"name"
+        })
       })
   
-      await Blog.findByIdAndUpdate(id,{$push:{comments:createComment._id}})
+      await Blog.findOneAndUpdate({blogid:id},{$push:{comments:createComment._id}})
   
       return res.status(200).json({
           message: "Comment added sucessfully",
+          sucess:true,
+          createComment
       });
   
     } catch (err) {

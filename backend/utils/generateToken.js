@@ -1,26 +1,30 @@
-const jwt=require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
-const dotenv=require('dotenv');
 dotenv.config();
-const token_secret=process.env.TOKEN_SECRET;
+const token_secret = process.env.TOKEN_SECRET;
 
-async function generateJWT(payload){
-    let token = await jwt.sign(payload,token_secret,{expiresIn:"70d"});
+function generateJWT(payload) {
+    const token = jwt.sign(payload, token_secret, { expiresIn: '70d' });
     return token;
 }
 
-async function verifyJWT(token){
-    let isValid = await jwt.verify(token,token_secret,);
-    return isValid; 
+function verifyJWT(token) {
+    try {
+        const isValid = jwt.verify(token, token_secret);
+        return isValid;
+    } catch (error) {
+        throw new Error('Invalid token');
+    }
 }
 
-async function decodeJWT(token){
-    let decode = await jwt.decode(token,token_secret);
-    return decode; 
+function decodeJWT(token) {
+    const decoded = jwt.decode(token);
+    return decoded;
 }
 
-module.exports={
+module.exports = {
     generateJWT,
     verifyJWT,
-    decodeJWT
-}
+    decodeJWT,
+};

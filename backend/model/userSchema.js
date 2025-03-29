@@ -13,7 +13,16 @@ const userSchema= new mongoose.Schema({
             type:String,
             ref:"Blog"
         }
-    ]
+    ],
+    verify:{
+        type:Boolean,
+        default:false
+    },
+    googleAuth:{
+        type:Boolean,
+        default:false
+    },
+    
 })  
 
 const User=mongoose.model("User",userSchema);
